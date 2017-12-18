@@ -1,0 +1,81 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+@Scripts.Render("~/bundles/fullcalendar")
+@Styles.Render("~/Content/fullcalendarcss")
+
+@section Scripts {
+    <script type="text/JavaScript">
+        //This code adds the Qtip feature so when you hover over a holiday that may be cut off because of size it'll show the full name of the holiday.
+        function qTipText(title) {
+            var text;
+
+            text = title;
+
+            return text;
+        }
+
+        //This code uses ajax to get the events from the database using the generateCalendar function below and GetEvents in the Home Controller. If the events fail to load you'll get the error message.
+        $(document).ready(function () {
+            var events = [];
+            $.ajax({
+
+                type: "GET",
+                url: "/Home/GetEvents",
+                success: function (data) {
+
+                    $.each(data, function (i, v) {
+
+                        events.push({
+                            title: v.title,
+                            start: moment(v.start)
+
+                        });
+
+                    })
+                    generateCalendar(events);
+                },
+                error: function (error) {
+                    alert("Failed");
+                }
+
+            })
+
+        });
+
+        //This code styles the calendar and renders the events.
+        function generateCalendar(events) {
+            $('#calendar').fullCalendar({
+                header: {
+                    left: 'prev,next,today',
+                    center: 'title',
+                    right: 'month,basicWeek,basicDay,agenda'
+                },
+                eventLimit: true,
+                events: events,
+                displayEventTime: false,
+                eventColor: '#c90',
+                eventRender: function (event, element) {
+
+                    element.qtip({
+                        content: {
+                            text: qTipText(event.start),
+                            title: '<strong>' + event.title + '</strong>'
+                        },
+                        position: {
+                            my: 'bottom left',
+                            at: 'top right'
+                        },
+                        style: { classes: 'qtip-shadow qtip-rounded' }
+                    });
+                }
+
+
+            })
+        };
+
+    </script>
+}
+
+<div id='calendar'></div>
